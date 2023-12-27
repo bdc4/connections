@@ -9,9 +9,7 @@ import { fileURLToPath, URL } from 'node:url'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  exports: {
-    publicPath: '/connections/'
-  },
+  base: '/connections/',
   plugins: [
     vue({
       template: { transformAssetUrls }
