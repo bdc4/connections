@@ -1,5 +1,8 @@
 <template>
   <div>
+    <template v-if="!Object.keys(this.connectionData).length">
+      <h1>Loading...</h1>
+    </template>
     <!--template v-html="tracker.join(`&\#13;`)" ref="tracker"></template-->
     <ul ref="tracker" class="tracker-ul">
       <li v-for="(row, $ind) in tracker" :key="$ind">
@@ -289,7 +292,7 @@ export default {
       const html = element.innerHTML;
       try {
         if (navigator.share) {
-          navigator.share({ title: (title + text) })
+          navigator.share({ title, text })
             .then(() => console.log('Successful share'))
             .catch(error => console.log('Error sharing:', error));
         } else {
