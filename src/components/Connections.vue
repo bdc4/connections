@@ -321,10 +321,3 @@ export default {
   top: 0;
 }
 </style>
-
-Connections
-Puzzle #200
-🟩🟩🟩🟩
-🟪🟪🟪🟪
-🟦🟦🟦🟦
-🟨🟨🟨🟨
