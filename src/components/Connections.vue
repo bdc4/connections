@@ -268,7 +268,7 @@ export default {
     },
     addToTracker(guesses) {
       var trackerRow = [];
-      var emojiKey = ["&#129001;", "&#129000;", "&#128998;", "&#129002;"];
+      var emojiKey = ['🟩','🟦','🟨','🟪'];
       guesses.forEach(guess => {
         // look up from master list
         for (var key in this.connectionData.groups) {
@@ -321,3 +321,10 @@ export default {
   top: 0;
 }
 </style>
+
+Connections
+Puzzle #200
+🟩🟩🟩🟩
+🟪🟪🟪🟪
+🟦🟦🟦🟦
+🟨🟨🟨🟨
