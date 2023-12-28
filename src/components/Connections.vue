@@ -292,7 +292,7 @@ export default {
       const html = element.innerHTML;
       try {
         if (navigator.share) {
-          navigator.share({ title, text })
+          navigator.share({ title, text: ('testing\n'+text) })
             .then(() => console.log('Successful share'))
             .catch(error => console.log('Error sharing:', error));
         } else {
