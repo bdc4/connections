@@ -111,7 +111,12 @@ export default {
   },
   async mounted() {
     var date = this.currentDate;
-    var data = (await axios.get(`/api/svc/connections/v1/${date}.json`, {
+    debugger;
+    var isDev =!window.location.href.includes('github.io');
+    var data = (await axios({
+      method: "GET",
+      baseURL: !isDev ? 'https://www.nytimes.com/' : undefined,
+      url: `${isDev ? '/api/' : '/'}svc/connections/v1/${date}.json`,
       crossDomain: true,
       headers: {
         "Content-Type": 'application/json'
