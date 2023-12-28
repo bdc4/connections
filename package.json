@@ -6,8 +6,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint . --fix --ignore-path .gitignore",
-    "deploy": "gh-pages -d dist",
-    "deploy2": "node scripts/gh-pages-deploy.mjs"
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "@mdi/font": "7.0.96",
