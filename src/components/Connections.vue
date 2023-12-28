@@ -293,7 +293,7 @@ export default {
       debugger;
       try {
         if (navigator.share) {
-          navigator.share({ title, text })
+          navigator.share({ title: undefined, text: (title+text) })
             .then(() => console.log('Successful share'))
             .catch(error => console.log('Error sharing:', error));
         } else {
