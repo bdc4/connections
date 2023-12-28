@@ -111,8 +111,8 @@ export default {
   },
   async mounted() {
     var date = this.currentDate;
-    debugger;
-    var isDev =!window.location.href.includes('github.io');
+    // TODO: Move this proxy to a dedicated webserver
+    var isDev = window.location.href.includes('localhost');
     var url = isDev ? `/api/svc/connections/v1/${date}.json` : `https://root-lean-galleon.glitch.me/api?date=${this.currentDate}`
     var data = (await axios({
       method: "GET",
