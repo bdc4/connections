@@ -113,10 +113,10 @@ export default {
     var date = this.currentDate;
     debugger;
     var isDev =!window.location.href.includes('github.io');
+    var url = isDev ? `/api/svc/connections/v1/${date}.json` : `https://root-lean-galleon.glitch.me/api?date=${this.currentDate}`
     var data = (await axios({
       method: "GET",
-      baseURL: !isDev ? 'https://www.nytimes.com/' : undefined,
-      url: `${isDev ? '/api/' : '/'}svc/connections/v1/${date}.json`,
+      url,
       crossDomain: true,
       headers: {
         "Content-Type": 'application/json'
