@@ -4,7 +4,7 @@
       <h1>Loading...</h1>
     </template>
     <!--template v-html="tracker.join(`&\#13;`)" ref="tracker"></template-->
-    <ul ref="tracker" class="tracker-ul">
+    <ul ref="tracker" id="tracker" class="tracker-ul">
       <li v-for="(row, $ind) in tracker" :key="$ind">
         <span v-for="(emoji, $$ind) in row" :key="$$ind" v-html="emoji"></span>
       </li>
@@ -290,9 +290,10 @@ export default {
       const title = `Connections\nPuzzle #${this.connectionData.id}\n`;
       const text = element.innerText;
       const html = element.innerHTML;
+      debugger;
       try {
         if (navigator.share) {
-          navigator.share({ title, text: ('testing\n'+text) })
+          navigator.share({ title, text })
             .then(() => console.log('Successful share'))
             .catch(error => console.log('Error sharing:', error));
         } else {
@@ -318,9 +319,8 @@ export default {
 <style>
 .tracker-ul {
   height: 0;
-  overflow: hidden;
   position: absolute;
-  left: 0;
+  left: -200px;
   top: 0;
 }
 </style>
