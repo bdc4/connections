@@ -16,6 +16,11 @@ const routes = [
       },
     ],
   },
+  {
+    path: '/connections/',
+    name: 'Home',
+    component: () => import('@/views/Home.vue'),
+  }
 ]
 
 const router = createRouter({
