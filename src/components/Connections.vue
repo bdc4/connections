@@ -3,12 +3,7 @@
     <template v-if="!Object.keys(this.connectionData).length">
       <h1>Loading...</h1>
     </template>
-    <!--template v-html="tracker.join(`&\#13;`)" ref="tracker"></template-->
-    <ul ref="tracker" id="tracker" class="tracker-ul">
-      <li v-for="(row, $ind) in tracker" :key="$ind">
-        <span v-for="(emoji, $$ind) in row" :key="$$ind" v-html="emoji"></span>
-      </li>
-    </ul>
+
     <div>
       <ConfettiExplosion v-if="triggerConfetti" :particle-count="100"
         :style="`position: absolute; left: ${window.width / 2}px; top: ${window.height / 2}px;`" />
@@ -45,7 +40,8 @@
           <!--v-col v-for="(group, $index) in grid" :key="$index" class="align-center" style="height: 15vh;"-->
           <v-col cols="3" v-for="item in grid.flat()" :key="item" class="pa-1"
             style="width: 25vw; height: 15vh; max-height: 25vw;">
-            <c-btn :size="buttonSize" :text="item" :color="getSelectionColor(item)" @click="select(item)"></c-btn>
+            <c-btn :size="buttonSize" :text="item" :showHint="hints.includes(item)" :color="getSelectionColor(item)"
+              @click="select(item)" :c-data="getGroupInfoFromID(item)"></c-btn>
           </v-col>
           <!--/v-row-->
         </v-row>
@@ -59,13 +55,16 @@
               @click="checkAnswers()" block>
               <v-icon icon="mdi-check"></v-icon>Submit
             </v-btn>
-            <v-btn v-else color="success" max-height="100px" variant="elevated" @click="shareAnswers()" block>
-              <v-icon icon="mdi-share"></v-icon>share
-            </v-btn>
+            <c-share v-else :puzzle-id="connectionData.id" :tracker="tracker"></c-share>
           </v-col>
           <v-col>
             <v-btn :disabled="loading" color="warning" @click="shuffle()" block>
               <v-icon icon="mdi-shuffle"></v-icon>
+            </v-btn>
+          </v-col>
+          <v-col>
+            <v-btn :disabled="loading || hints.length == grid.flat().length" color="warning" @click="showHint()" block>
+              <v-icon icon="mdi-help-circle-outline"></v-icon>Show Hint
             </v-btn>
           </v-col>
           <v-col>
@@ -88,11 +87,14 @@ import axios from 'axios'
 import ConnectionsButton from './ConnectionsButton.vue'
 import ConnectionsInfo from './ConnectionsInfo.vue'
 import ConfettiExplosion from "vue-confetti-explosion";
+import ConnectionsShare from './ConnectionsShare.vue';
+
 export default {
   components: {
     cBtn: ConnectionsButton,
     ConfettiExplosion,
-    cInfo: ConnectionsInfo
+    cInfo: ConnectionsInfo,
+    cShare: ConnectionsShare
   },
   data() {
     return {
@@ -109,7 +111,8 @@ export default {
       },
       showAlert: false,
       triggerConfetti: false,
-      tracker: []
+      tracker: [],
+      hints: []
     }
   },
   async mounted() {
@@ -245,12 +248,14 @@ export default {
     },
     shuffle() {
       this.loading = true;
+
       //reset if done
       if (Object.keys(this.answered).length >= 4) {
         this.answered = {};
         this.grid = this.connectionData.startingGroups;
       }
 
+      // Generate random grid
       try {
         var outputGrid = [...this.flattenedGrid];
         outputGrid.sort(() => Math.random() - 0.5);
@@ -271,56 +276,56 @@ export default {
     },
     addToTracker(guesses) {
       var trackerRow = [];
-      var emojiKey = ['🟩','🟦','🟨','🟪'];
+      var emojiKey = ['🟩', '🟦', '🟨', '🟪'];
       guesses.forEach(guess => {
         // look up from master list
-        for (var key in this.connectionData.groups) {
-          var level = this.connectionData.groups[key].level;
-          this.connectionData.groups[key].members.forEach(member => {
-            if (member == guess) {
-              trackerRow.push(emojiKey[level]);
-            }
-          });
-        }
+        var groupData = this.getGroupInfoFromID(guess);
+        trackerRow.push(emojiKey[groupData.level]);
       });
       this.tracker.push(trackerRow);
     },
-    shareAnswers() {
-      const element = this.$refs.tracker;
-      const title = `Connections\nPuzzle #${this.connectionData.id}\n`;
-      const text = element.innerText;
-      const html = element.innerHTML;
-      debugger;
-      try {
-        if (navigator.share) {
-          navigator.share({ title: undefined, text: (title+text) })
-            .then(() => console.log('Successful share'))
-            .catch(error => console.log('Error sharing:', error));
-        } else {
-          throw "Share functionality not supported for device; copying to clipboard instead.";
-        }
-      } catch (e) {
-        navigator.clipboard.write([new ClipboardItem({
-          'text/plain': new Blob([title + text], { type: 'text/plain' }),
-          'text/html': new Blob([html], { type: 'text/html' })
-        })])
-          .then(() => {
-            this.showAlert = true;
-            this.snackbar.message = "Copied to Clipboard!";
-            this.snackbar.color = "success";
-          })
-          .catch(error => console.log('Error sharing:', error));
+    getGroupInfoFromID(id) {
+      for (var key in this.connectionData.groups) {
+        var level = this.connectionData.groups[key].level;
+        var members = this.connectionData.groups[key].members;
+        var data;
+        members.forEach(member => {
+          if (member == id) {
+            data = { id, level, members, color: this.border[level] };
+          }
+        });
+        if (data)
+          return data;
       }
+    },
+    showHint() {
+      // get a random unanswered member
+      var g = [...this.grid.flat()];
+      var randomMember;
+
+      do {
+        randomMember = this.getRandomFromArray(g);
+      } while (this.hints.includes(randomMember));
+
+      /*
+      var relatedMember = randomMember;
+
+      // Make sure the related member isn't the same member
+      while (relatedMember.id == randomMember.id) {
+        relatedMember = this.getRandomFromArray(randomMember.members);
+        relatedMember = this.getGroupInfoFromID(relatedMember);
+      }
+      */
+
+      // add their keys to the hint array
+      this.hints.push(randomMember);
+    },
+    getRandomFromArray(g) {
+      return g[Math.floor(Math.random() * g.length)];
     }
   },
 }
 </script>
 
 <style>
-.tracker-ul {
-  height: 0;
-  position: absolute;
-  left: -200px;
-  top: 0;
-}
 </style>
