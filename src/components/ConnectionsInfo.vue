@@ -47,6 +47,7 @@
         <v-card-actions class="justify-center">
           <v-btn @click="open = false" color="primary" variant="flat">Okay!</v-btn>
         </v-card-actions>
+        <small>{{ appVersion }}</small>
       </v-card>
     </v-dialog>
   </span>
@@ -57,6 +58,11 @@ export default {
   data() {
     return {
       open: false
+    }
+  },
+  computed: {
+    appVersion () {
+      return __APP_VERSION__;
     }
   }
 }

@@ -92,10 +92,9 @@
             block>Continue?</v-btn>
         </v-card-text>
       </v-card>
-
     </v-dialog>
-
   </div>
+  <small>{{ appVersion }}</small>
 </template>
 
 <script>
@@ -191,6 +190,9 @@ export default {
     }
   },
   computed: {
+    appVersion () {
+      return __APP_VERSION__;
+    },
     gameState () {
       var str = '';
       this.gameStateKeys.forEach(key => {
