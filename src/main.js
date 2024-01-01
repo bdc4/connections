@@ -24,14 +24,22 @@ const store = createStore({
     return {
       preferences: {
         difficulty: 1,
-        showHints: true,
-        customSettings: false
-      }
+        showHints: false,
+        customSettings: false,
+        unlimitedGuesses: false,
+        showAwayMessages: true
+      },
+      game: {}
     }
   },
   mutations: {
     save(state, payload) {
       state[payload.id] = payload.value;
+    },
+    saveGameState(state, payload) {
+      Object.keys(payload).forEach(key => {
+        state.game[key] = payload[key];
+      })
     }
   }
 })

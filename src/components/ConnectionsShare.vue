@@ -1,7 +1,5 @@
 
 <template>
-
-
   <DefineTemplate>
     <v-snackbar v-model="copySuccess" color="success">Copied to Clipboard!</v-snackbar>
     <v-card>
@@ -33,6 +31,7 @@
     </v-card>
   </DefineTemplate>
 
+  <!-- MAIN -->
   <v-btn v-if="!openOnLoad" color="success" max-height="100px" variant="elevated" @click="shareAnswers(openOnClick)" block>
     <v-icon icon="mdi-share"></v-icon>share
   </v-btn>
@@ -45,37 +44,6 @@
       <ReuseTemplate></ReuseTemplate>
     </div>
   </template>
-  <!--component :is="(openOnLoad ? 'template' : 'v-dialog')" v-model="open" class="text-center">
-    
-    <v-snackbar v-model="copySuccess" color="success">Copied to Clipboard!</v-snackbar>
-    <v-card>
-      <v-card-title>
-        {{ message || 'Share Your Results!' }}
-      </v-card-title>
-      <v-card-text>
-        <h3>{{ title }}</h3>
-        <c-tracker ref="tracker" :tracker="tracker"></c-tracker>
-      </v-card-text>
-      <v-card-actions>
-        <v-layout class="flex-column">
-          <v-row v-if="!shareFailed">
-            <v-col>
-              <v-btn color="success" variant="elevated" @click="shareAnswers(false)" block>
-                <v-icon icon="mdi-share"></v-icon>share
-              </v-btn>
-            </v-col>
-          </v-row>
-          <v-row v-else>
-            <v-col>
-              <v-btn color="primary" variant="elevated" @click="copyToClipboard()" block>
-                <v-icon icon="mdi-clipboard-multiple-outline"></v-icon>Copy To Clipboard
-              </v-btn>
-            </v-col>
-          </v-row>
-        </v-layout>
-      </v-card-actions>
-    </v-card>
-  </component-->
 </template>
 
 <script>

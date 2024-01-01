@@ -108,6 +108,7 @@ import ConnectionsSettings from './ConnectionsSettings.vue';
 import ConnectionsTracker from './ConnectionsTracker.vue';
 
 export default {
+
   components: {
     cBtn: ConnectionsButton,
     ConfettiExplosion,
@@ -134,10 +135,12 @@ export default {
       tracker: [],
       hints: [],
       misses: 0,
-      gameOver: false
+      gameOver: false,
+      gameStateKeys: ['grid','hints','misses','tracker','answered']
     }
   },
   async mounted() {
+
     var date = this.currentDate;
     // TODO: Move this proxy to a dedicated webserver
     var isDev = window.location.href.includes('localhost');
@@ -150,9 +153,15 @@ export default {
         "Content-Type": 'application/json'
       }
     })).data;
-    console.log(data)
+
     this.connectionData = data;
     this.grid = this.connectionData.startingGroups;
+
+    // Load Game State from memory
+    const gameState = this.$store.state.game;
+    this.gameStateKeys.forEach(key => {
+      this[key] = gameState[key] || this[key];
+    });
   },
   created() {
     window.addEventListener('resize', this.handleResize);
@@ -162,6 +171,15 @@ export default {
     window.removeEventListener('resize', this.handleResize);
   },
   watch: {
+    'gameState': {
+      handler: function (newVal, oldVal) {
+        const payload = {}
+        this.gameStateKeys.forEach(key => {
+          payload[key] = this[key];
+        });
+        this.$store.commit('saveGameState', payload);
+      }
+    },
     'gameOver': {
       handler: function (newVal, oldVal) {
         if (newVal == true) {
@@ -171,6 +189,13 @@ export default {
     }
   },
   computed: {
+    gameState () {
+      var str = '';
+      this.gameStateKeys.forEach(key => {
+        str += JSON.stringify(this[key]) + '|'
+      })
+      return str;
+    },
     currentDate() {
       var localDate = new Date().toDateString();
       return new Date(localDate).toISOString().split('T')[0];
