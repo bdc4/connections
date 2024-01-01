@@ -70,7 +70,7 @@
           <v-col>
             <v-btn :disabled="!selected.length" color="red" @click="selected = []"
               :variant="(!selected.length) ? 'outlined' : 'elevated'" block>
-              <v-icon icon="mdi-close"></v-icon>
+              <v-icon icon="mdi-close-thick"></v-icon>
             </v-btn>
           </v-col>
         </v-row>
@@ -158,7 +158,7 @@ export default {
     this.grid = this.connectionData.startingGroups;
 
     // Load Game State from memory
-    const gameState = this.$store.state.game;
+    const gameState = this.$store.state.game[date];
     this.gameStateKeys.forEach(key => {
       this[key] = gameState[key] || this[key];
     });
@@ -177,7 +177,9 @@ export default {
         this.gameStateKeys.forEach(key => {
           payload[key] = this[key];
         });
-        this.$store.commit('saveGameState', payload);
+        this.$store.commit('saveGameState', {
+          [this.currentDate]: payload
+        });
       }
     },
     'gameOver': {
@@ -198,7 +200,7 @@ export default {
     },
     currentDate() {
       var localDate = new Date().toDateString();
-      return new Date(localDate).toISOString().split('T')[0];
+      return this.$route.query.date || (new Date(localDate).toISOString().split('T')[0]);
     },
     buttonSize() {
       var b = {
