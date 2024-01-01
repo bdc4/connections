@@ -22,7 +22,7 @@
             <div>{{ this.currentDate }}</div>
           </v-col>
           <v-col class="text-right" cols="3">
-            <v-icon icon="mdi-cog" size="x-large"></v-icon>
+            <c-prefs />
             <c-info />
           </v-col>
         </v-row>
@@ -55,15 +55,15 @@
               @click="checkAnswers()" block>
               <v-icon icon="mdi-check"></v-icon>Submit
             </v-btn>
-            <c-share v-else :puzzle-id="connectionData.id" :tracker="tracker"></c-share>
+            <c-share v-else :puzzle-id="connectionData.id" :tracker="tracker" :open-on-click="true"></c-share>
           </v-col>
           <v-col>
             <v-btn :disabled="loading" color="warning" @click="shuffle()" block>
               <v-icon icon="mdi-shuffle"></v-icon>
             </v-btn>
           </v-col>
-          <v-col>
-            <v-btn :disabled="loading || hints.length == grid.flat().length" color="warning" @click="showHint()" block>
+          <v-col v-if="$store.state.preferences.showHints">
+            <v-btn :disabled="loading || hints.length > (grid.flat().length - 2)" color="info" @click="showHint()" block>
               <v-icon icon="mdi-help-circle-outline"></v-icon>Show Hint
             </v-btn>
           </v-col>
@@ -74,10 +74,26 @@
             </v-btn>
           </v-col>
         </v-row>
+        <v-row v-if="!$store.state.preferences.unlimitedGuesses" class="text-center">
+          <v-col v-for="(miss, ind) in [0, 1, 2, 3]" :key="ind">
+            <v-icon :icon="`mdi-close-${(ind < misses) ? 'thick' : 'outline'}`" size="x-large"
+              :color="`${(ind < misses) ? 'red' : ''}`"></v-icon>
+          </v-col>
+        </v-row>
       </v-row>
-
     </v-container>
 
+    <!-- GAME OVER -->
+    <v-dialog v-model="gameOver" persistent>
+      <v-card>
+        <v-card-text>
+          <c-share :open-on-load="true" :puzzle-id="connectionData.id" :tracker="tracker" message="Nice Try..."></c-share>
+          <v-btn @click="removeMisses(); gameOver = false;" class="mt-10" variant="flat" color="red"
+            block>Continue?</v-btn>
+        </v-card-text>
+      </v-card>
+
+    </v-dialog>
 
   </div>
 </template>
@@ -88,13 +104,17 @@ import ConnectionsButton from './ConnectionsButton.vue'
 import ConnectionsInfo from './ConnectionsInfo.vue'
 import ConfettiExplosion from "vue-confetti-explosion";
 import ConnectionsShare from './ConnectionsShare.vue';
+import ConnectionsSettings from './ConnectionsSettings.vue';
+import ConnectionsTracker from './ConnectionsTracker.vue';
 
 export default {
   components: {
     cBtn: ConnectionsButton,
     ConfettiExplosion,
     cInfo: ConnectionsInfo,
-    cShare: ConnectionsShare
+    cShare: ConnectionsShare,
+    cPrefs: ConnectionsSettings,
+    cTracker: ConnectionsTracker
   },
   data() {
     return {
@@ -102,7 +122,7 @@ export default {
       connectionData: {},
       grid: [],
       selected: [],
-      border: ['green', 'blue', 'yellow', 'purple'],
+      border: ['yellow', 'green', 'blue', 'purple'],
       answered: {},
       loading: false,
       snackbar: {
@@ -112,7 +132,9 @@ export default {
       showAlert: false,
       triggerConfetti: false,
       tracker: [],
-      hints: []
+      hints: [],
+      misses: 0,
+      gameOver: false
     }
   },
   async mounted() {
@@ -138,6 +160,15 @@ export default {
   },
   destroyed() {
     window.removeEventListener('resize', this.handleResize);
+  },
+  watch: {
+    'gameOver': {
+      handler: function (newVal, oldVal) {
+        if (newVal == true) {
+          this.tracker.push(['❌', '❌', '❌', '❌'])
+        }
+      }
+    }
   },
   computed: {
     currentDate() {
@@ -202,9 +233,18 @@ export default {
           }
           closestNumber = Math.max(closestNumber, numberFoundInGroup);
         }
+
         this.showAlert = true;
-        this.snackbar.message = (4 - closestNumber + ' Away...');
+        this.snackbar.message = this.$store.state.preferences.showAwayMessages ?
+          (4 - closestNumber + ' Away...') : 'Incorrect...';
         this.snackbar.color = 'red';
+
+        this.misses++;
+
+        if (this.misses >= 4 && !this.$store.state.preferences.unlimitedGuesses) {
+          this.gameOver = true;
+        }
+
         this.loading = false;
       } catch (e) {
         console.error(e);
@@ -276,7 +316,7 @@ export default {
     },
     addToTracker(guesses) {
       var trackerRow = [];
-      var emojiKey = ['🟩', '🟦', '🟨', '🟪'];
+      var emojiKey = ['🟨', '🟩', '🟦', '🟪'];
       guesses.forEach(guess => {
         // look up from master list
         var groupData = this.getGroupInfoFromID(guess);
@@ -307,7 +347,7 @@ export default {
         randomMember = this.getRandomFromArray(g);
       } while (this.hints.includes(randomMember));
 
-      /*
+      randomMember = this.getGroupInfoFromID(randomMember);
       var relatedMember = randomMember;
 
       // Make sure the related member isn't the same member
@@ -315,17 +355,21 @@ export default {
         relatedMember = this.getRandomFromArray(randomMember.members);
         relatedMember = this.getGroupInfoFromID(relatedMember);
       }
-      */
 
       // add their keys to the hint array
-      this.hints.push(randomMember);
+      this.hints.push(randomMember.id, relatedMember.id);
     },
     getRandomFromArray(g) {
       return g[Math.floor(Math.random() * g.length)];
+    },
+    removeMisses() {
+      if (this.misses > 0) {
+        this.misses--;
+        setTimeout(this.removeMisses, 150);
+      }
     }
-  },
+  }
 }
 </script>
 
-<style>
-</style>
+<style></style>

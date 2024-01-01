@@ -2,7 +2,7 @@
   <v-btn 
   :width="size.width" 
   :height="height">
-    {{ text }}
+    <p :style="`font-size: ${textWidth}%;`">{{ text }}</p>
     <v-badge v-if="showHint" class="hint-badge" :color="cData.color"></v-badge>
   </v-btn>
 </template>
@@ -24,6 +24,9 @@ export default {
     },
     info () {
       return this.cData.members;
+    },
+    textWidth () {
+      return (100 / (Math.max(this.text.length, 6) / 6)) + '';
     }
   }
 }
@@ -34,5 +37,8 @@ export default {
   position: absolute;
   left: 15px;
   top: 10px;
+}
+.c-btn-text {
+  font-size: 2vmin;
 }
 </style>
