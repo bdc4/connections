@@ -17,7 +17,12 @@ const routes = [
     ],
   },
   {
-    path: '/connections/',
+    path: '/connections/:date',
+    name: 'Home',
+    component: () => import('@/views/Home.vue'),
+  },
+  {
+    path: '/connections',
     name: 'Home',
     component: () => import('@/views/Home.vue'),
   }

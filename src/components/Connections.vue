@@ -200,7 +200,7 @@ export default {
     },
     currentDate() {
       var localDate = new Date().toDateString();
-      return this.$route.query.date || (new Date(localDate).toISOString().split('T')[0]);
+      return this.$route.params.date || (new Date(localDate).toISOString().split('T')[0]);
     },
     buttonSize() {
       var b = {
