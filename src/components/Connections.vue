@@ -32,7 +32,7 @@
           <v-col cols="12" v-for="answer in Object.keys(answered)" :key="answer" class="pa-0 mb-2" style="height: 15vh;">
             <v-btn :height="buttonSize.height" :color="getBorderColor(answer)" block>
               <div>
-                <h3>{{ answer }}</h3>
+                <h3 style="text-wrap: balance;">{{ answer }}</h3>
                 <div>{{ answered[answer].join() }}</div>
               </div>
             </v-btn>
