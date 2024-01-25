@@ -80,7 +80,7 @@
             </v-btn>
           </v-col>
         </v-row>
-        <v-row v-if="!$store.state.preferences.unlimitedGuesses" class="text-center">
+        <v-row v-if="!$store.state.preferences.unlimitedGuesses && !gameDone" class="text-center">
           <v-col v-for="(miss, ind) in [0, 1, 2, 3]" :key="ind">
             <v-icon :icon="`mdi-close-${(ind < misses) ? 'thick' : 'outline'}`" size="x-large"
               :color="`${(ind < misses) ? 'red' : ''}`"></v-icon>

@@ -1,5 +1,6 @@
 <template>
-  <v-btn :color="(alreadyReadNotes ? 'info' : 'warning')" density="compact" icon size="medium" class="ml-2">
+  <v-btn :color="(alreadyReadNotes ? 'info' : 'warning')" density="compact" 
+  :variant="alreadyReadNotes? 'text' : 'outlined'" icon size="medium" class="ml-2">
     <v-icon v-if="alreadyReadNotes">mdi-note-text-outline</v-icon>
     <v-icon v-else>mdi-exclamation-thick</v-icon>
     <v-dialog activator="parent" v-model="openModal">
@@ -27,8 +28,8 @@
             <div :class="`body-heading-7 text-${set[3] || 'primary'}`"><v-icon :color="set[3]" class="mr-2">{{ set[2]
             }}</v-icon>{{ set[1] }}</div>
             <div class="text-subtitle-2">
-              <li v-for="item in notes[set[0]]" class="my-2" :key="`${i}:${set[0]}:${item.length}`">
-                {{ item }}
+              <li v-for="item in notes[set[0]]" class="my-2" :key="`${i}:${set[0]}:${item.length}`"
+              v-html="item">
               </li>
             </div>
 
@@ -56,8 +57,8 @@ console.log(patchNotes, 'patchNotes');
 const notes = patchNotes[0];
 const lastVersionChecked = localStorage.getItem('patchNotesVersion') || '';
 const alreadyReadNotes = ref(lastVersionChecked == notes.version);
-
-var openModal = ref(false)
+const isFresh = checkFresh();
+var openModal = ref(!!(isFresh && !alreadyReadNotes.value));
 
 const structure = [
   ['updates', 'Updates', 'mdi-new-box', 'success'],
@@ -69,6 +70,20 @@ const readNotes = function() {
   openModal.value = false;
   localStorage.setItem('patchNotesVersion', notes.version);
   alreadyReadNotes.value = true;
+}
+
+function addDays(days, inputDate) {
+    var date = new Date(inputDate);
+    date.setDate(date.getDate() + days);
+    return date;
+}
+
+function checkFresh() {
+  var notesDate = new Date(notes.date);
+  var expiryDate = new Date(addDays(5, notesDate));
+  var today = new Date();
+
+  return (notesDate < today && today < expiryDate);
 }
 
 </script>
