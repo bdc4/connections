@@ -55,10 +55,10 @@ import { ref } from 'vue';
 
 console.log(patchNotes, 'patchNotes');
 const notes = patchNotes[0];
-const lastVersionChecked = localStorage.getItem('patchNotesVersion') || '';
+const lastVersionChecked = localStorage.getItem('patchNotesVersion') || null;
 const alreadyReadNotes = ref(lastVersionChecked == notes.version);
 const isFresh = checkFresh();
-var openModal = ref(!!(isFresh && !alreadyReadNotes.value));
+var openModal = ref(!!(isFresh && !alreadyReadNotes.value && lastVersionChecked === null));
 
 const structure = [
   ['updates', 'Updates', 'mdi-new-box', 'success'],
