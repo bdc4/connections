@@ -4,7 +4,7 @@
   "description": "Thanks for playing! Since there are lots of updates, I thought I'd start keeping track. Every time I make a significant change, I will release a document like this with a brief explination of the updates (aka: Patch Notes). Without further adieu, here are the changes!",
   "updates": [
     "Updated confetti! 🎉🎊🥳",
-    "Added more emojis for when you use hints, get a perfect score, and when you get the purple group on your first guess!! 🤩🤩🤩",
+    "Added more emojis for when you use hints, and when you get the purple group on your first guess!! 🧠🧐",
     "Oh! and... added patch notes of course! If you want to see them again, you can find a <span class=\"mdi mdi-note-text-outline\"></span> button on top of the screen."
   ],
   "fixes": [
