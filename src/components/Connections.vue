@@ -38,7 +38,7 @@
             :ref="`answerRef${answer}`">
             <v-btn :height="buttonSize.height" :color="getBorderColor(answer)" block @click="explode(answer)">
               <div>
-                <h3 style="text-wrap: balance;">{{ answer }}</h3>
+                <h3 style="white-space: normal;">{{ answer }}</h3>
                 <div>{{ answered[answer].join() }}</div>
               </div>
             </v-btn>
