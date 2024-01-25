@@ -1,0 +1,20 @@
+[{
+  "title": "Patch Notes",
+  "subtitle": "Lots of updates!",
+  "description": "Thanks for playing! Since there are lots of updates, I thought I'd start keep track. Every time I make a significant change, I will release a document like this with a brief explination of the updates (aka: Patch Notes). Without further adieu, here are the changes!",
+  "updates": [
+    "Updated confetti! 🎉🎊🥳",
+    "Added more emojis for when you use hints, get a perfect score, and when you get the purple group on your first guess!! 🤩🤩🤩",
+    "Oh! and... added patch notes of course! If you want to see them again, there will be a button on top of the screen."
+  ],
+  "fixes": [
+    "Fixed a bug where long category names would cause the row to run off the screen.",
+    "Cleaned up some of the UI elements.",
+    "Other minor bug fixes."
+  ],
+  "comingSoon": [
+    "The ability to go back and do previous Connections!"
+  ],
+  "version": "1.0.0.1",
+  "date": "2024-01-24"
+}]

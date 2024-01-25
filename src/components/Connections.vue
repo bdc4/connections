@@ -1,12 +1,14 @@
 <template>
   <div>
+    <!-- input v-on:keyup.enter="explode()" /-->
     <template v-if="!Object.keys(this.connectionData).length">
       <h1>Loading...</h1>
     </template>
 
     <div>
-      <ConfettiExplosion v-if="triggerConfetti" :particle-count="100"
-        :style="`position: absolute; left: ${window.width / 2}px; top: ${window.height / 2}px;`" />
+      <ConfettiExplosion v-if="confetti.trigger" :particle-count="50" :colors="confetti.colors" class="img-r-180"
+        :stage-height="window.height" :stage-width="window.width * 1.25" :force="1"
+        :style="`position: absolute; left: ${confetti.location.x}px; top: ${confetti.location.y}px;`" />
       <v-snackbar v-model="showAlert" location="center" :color="snackbar.color" max-width="80" timeout="1500"
         content-class="text-center">
         <span>{{ snackbar.message }}</span>
@@ -18,7 +20,10 @@
         <!-- HEADER ROW -->
         <v-row>
           <v-col cols="9">
-            <h3>Connections 2.0</h3>
+            <div class="d-flex">
+              <h3>Connections 2.0</h3>
+              <span><c-patch-notes /></span>
+            </div>
             <div>{{ this.currentDate }}</div>
           </v-col>
           <v-col class="text-right" cols="3">
@@ -29,8 +34,9 @@
 
         <!-- GRID ROW -->
         <v-row class="ml-2 mr-2">
-          <v-col cols="12" v-for="answer in Object.keys(answered)" :key="answer" class="pa-0 mb-2" style="height: 15vh;">
-            <v-btn :height="buttonSize.height" :color="getBorderColor(answer)" block>
+          <v-col cols="12" v-for="answer in Object.keys(answered)" :key="answer" class="pa-0 mb-2" style="height: 15vh;"
+            :ref="`answerRef${answer}`">
+            <v-btn :height="buttonSize.height" :color="getBorderColor(answer)" block @click="explode(answer)">
               <div>
                 <h3 style="text-wrap: balance;">{{ answer }}</h3>
                 <div>{{ answered[answer].join() }}</div>
@@ -50,24 +56,24 @@
         <!-- TOOLBAR -->
         <v-row class="align-center justify-center mb-5" style="height: 10vh;">
           <v-col :cols="window.width >= window.height ? '8' : '12'">
-            <v-btn v-if="Object.keys(answered).length < 4" :disabled="loading || selected.length !== 4" color="success"
-              max-height="100px" :variant="(loading || selected.length !== 4) ? 'outlined' : 'elevated'"
-              @click="checkAnswers()" block>
+            <v-btn v-if="!gameDone" :disabled="loading || selected.length !== 4" color="success" max-height="100px"
+              :variant="(loading || selected.length !== 4) ? 'outlined' : 'elevated'" @click="checkAnswers()" block>
               <v-icon icon="mdi-check"></v-icon>Submit
             </v-btn>
-            <c-share v-else :puzzle-id="connectionData.id" :tracker="tracker" :open-on-click="true"></c-share>
+            <c-share v-else :puzzle-id="connectionData.id" :tracker="tracker" :open-on-click="true"
+              share-height="80px"></c-share>
           </v-col>
-          <v-col>
+          <v-col v-if="!gameDone">
             <v-btn :disabled="loading" color="warning" @click="shuffle()" block>
               <v-icon icon="mdi-shuffle"></v-icon>
             </v-btn>
           </v-col>
-          <v-col v-if="$store.state.preferences.showHints">
+          <v-col v-if="$store.state.preferences.showHints && !gameDone">
             <v-btn :disabled="loading || hints.length > (grid.flat().length - 2)" color="info" @click="showHint()" block>
               <v-icon icon="mdi-help-circle-outline"></v-icon>Show Hint
             </v-btn>
           </v-col>
-          <v-col>
+          <v-col v-if="!gameDone">
             <v-btn :disabled="!selected.length" color="red" @click="selected = []"
               :variant="(!selected.length) ? 'outlined' : 'elevated'" block>
               <v-icon icon="mdi-close-thick"></v-icon>
@@ -105,6 +111,7 @@ import ConfettiExplosion from "vue-confetti-explosion";
 import ConnectionsShare from './ConnectionsShare.vue';
 import ConnectionsSettings from './ConnectionsSettings.vue';
 import ConnectionsTracker from './ConnectionsTracker.vue';
+import ConnectionsPatchNotes from './ConnectionsPatchNotes.vue';
 
 export default {
 
@@ -114,28 +121,43 @@ export default {
     cInfo: ConnectionsInfo,
     cShare: ConnectionsShare,
     cPrefs: ConnectionsSettings,
-    cTracker: ConnectionsTracker
+    cTracker: ConnectionsTracker,
+    cPatchNotes: ConnectionsPatchNotes
   },
   data() {
     return {
       window: { width: 0, height: 0 },
       connectionData: {},
+      confetti: {
+        location: {
+          x: window.innerWidth / 2, y: window.innerHeight / 3
+        },
+        trigger: false,
+        colors: undefined
+      },
       grid: [],
       selected: [],
-      border: ['yellow', 'green', 'blue', 'purple'],
+      borderRGBColors: [
+        [255, 235, 59],
+        [76, 175, 80],
+        [33, 150, 243],
+        [156, 39, 176]
+      ],
+      border: ['rgb(255, 235, 59)', 'rgb(76, 175, 80)', 'rgb(33, 150, 243)', 'rgb(156, 39, 176)'],
       answered: {},
+      answerRefs: [],
       loading: false,
       snackbar: {
         message: '',
         color: 'red'
       },
       showAlert: false,
-      triggerConfetti: false,
       tracker: [],
       hints: [],
+      hintUsed: false,
       misses: 0,
       gameOver: false,
-      gameStateKeys: ['grid','hints','misses','tracker','answered']
+      gameStateKeys: ['grid', 'hints', 'misses', 'tracker', 'answered', 'showHint']
     }
   },
   async mounted() {
@@ -190,10 +212,10 @@ export default {
     }
   },
   computed: {
-    appVersion () {
+    appVersion() {
       return __APP_VERSION__;
     },
-    gameState () {
+    gameState() {
       var str = '';
       this.gameStateKeys.forEach(key => {
         str += JSON.stringify(this[key]) + '|'
@@ -213,9 +235,26 @@ export default {
     },
     flattenedGrid() {
       return this.grid.flat();
+    },
+    confettiColors() {
+      return this.getConfettiColors(Object.keys(this.answered)[Object.keys(this.answered).length - 1]);
+    },
+    gameDone() {
+      return Object.keys(this.answered).length >= 4
     }
   },
   methods: {
+    getCategoryInfo() {
+      const key = Object.keys(this.answered)[Object.keys(this.answered).length - 1];
+      const refString = key && `answerRef${key}`; //.replace(' ','')
+      const location = this.$refs[refString]; //key && this.$refs[refString];
+      const output = {
+        key,
+        value: { ...this.answered[key] },
+        location
+      }
+      return output
+    },
     handleResize() {
       this.window.width = window.innerWidth;
       this.window.height = window.innerHeight;
@@ -257,8 +296,9 @@ export default {
             }
           }
           if (numberFoundInGroup >= 4) {
-            this.explode();
-            return this.processGroup(group);
+            this.processGroup(group);
+            this.explode(group);
+            return;
           }
           closestNumber = Math.max(closestNumber, numberFoundInGroup);
         }
@@ -312,14 +352,41 @@ export default {
       this.loading = false;
     },
     getBorderColor(groupId) {
+      if (!groupId) return;
       var i = this.connectionData.groups[groupId].level;
-      return this.border[i];
+      const rgb = this.borderRGBColors[i];
+      const rgbString = this.getRGBString(rgb);
+      return rgbString;
+    },
+    getConfettiColors(groupId) {
+      if (!groupId) return;
+      var i = this.connectionData.groups[groupId].level;
+      const rgb = this.borderRGBColors[i];
+      const rootColor = this.getRGBString(rgb);
+      var colors = [rootColor];
+
+      // "shake" the main color
+      const shakeStrength = 90;
+      [...Array(5)].forEach((_, i) => {
+        var newColors = [];
+        rgb.forEach(color => {
+          var modifier = (Math.random() - .5);
+          var newColor = Math.floor(color + (modifier * shakeStrength));
+          color = color < 255 ? Math.max(0, newColor) : Math.min(newColor, 255);
+          newColors.push(newColor);
+        });
+        colors.push(this.getRGBString(newColors));
+      });
+      return colors;
+    },
+    getRGBString(rgb) {
+      return `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`;
     },
     shuffle() {
       this.loading = true;
 
       //reset if done
-      if (Object.keys(this.answered).length >= 4) {
+      if (this.gameDone) {
         this.answered = {};
         this.grid = this.connectionData.startingGroups;
       }
@@ -335,22 +402,46 @@ export default {
         this.loading = false;
       }
     },
-    explode() {
-      if (this.triggerConfetti) {
-        this.triggerConfetti = false;
+    explode(groupID) {
+      if (this.confetti.trigger) {
+        this.confetti.trigger = false;
       }
       setTimeout(() => {
-        this.triggerConfetti = true;
+        if (groupID) {
+          var ref = this.$refs && this.$refs[`answerRef${groupID}`][0].$el.getBoundingClientRect();
+          const xMid = ref.x + (ref.width / 2);
+          const yMid = ref.y + (ref.height / 2);
+          this.confetti.colors = !this.gameDone ? this.getConfettiColors(groupID) : this.border;
+          //this.getGroupInfoFromID(groupID).location;
+          this.confetti.location.x = xMid;
+          this.confetti.location.y = yMid;
+        }
+        this.confetti.trigger = true;
       }, 200)
     },
     addToTracker(guesses) {
       var trackerRow = [];
       var emojiKey = ['🟨', '🟩', '🟦', '🟪'];
+
       guesses.forEach(guess => {
         // look up from master list
         var groupData = this.getGroupInfoFromID(guess);
         trackerRow.push(emojiKey[groupData.level]);
       });
+
+      if (this.hintUsed) {
+        trackerRow.push('🤡');
+        this.hintUsed = false;
+      } else {
+        var isPerfectlyCorrect = true;
+        [0, 1, 2, 3].forEach(i => {
+          isPerfectlyCorrect = isPerfectlyCorrect && trackerRow[i] == '🟪';
+        });
+        if (isPerfectlyCorrect && !this.tracker.length) {
+          trackerRow.push('🤯');
+        }
+      }
+
       this.tracker.push(trackerRow);
     },
     getGroupInfoFromID(id) {
@@ -386,6 +477,7 @@ export default {
       }
 
       // add their keys to the hint array
+      this.hintUsed = true;
       this.hints.push(randomMember.id, relatedMember.id);
     },
     getRandomFromArray(g) {
@@ -401,4 +493,16 @@ export default {
 }
 </script>
 
-<style></style>
+<style scoped>
+.img-r-90 {
+  transform: rotate(90deg);
+}
+
+.img-r-180 {
+  transform: rotate(180deg);
+}
+
+.img-r-270 {
+  transform: rotate(270deg);
+}
+</style>

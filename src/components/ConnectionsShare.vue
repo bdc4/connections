@@ -7,7 +7,7 @@
         {{ message || 'Share Your Results!' }}
       </v-card-title>
       <v-card-text>
-        <h3>{{ title }}</h3>
+        <h3>{{ shareTitle }}</h3>
         <c-tracker ref="tracker" :tracker="tracker"></c-tracker>
       </v-card-text>
       <v-card-actions>
@@ -32,7 +32,7 @@
   </DefineTemplate>
 
   <!-- MAIN -->
-  <v-btn v-if="!openOnLoad" color="success" max-height="100px" variant="elevated" @click="shareAnswers(openOnClick)" block>
+  <v-btn :style="`height: ${shareHeight}`" v-if="!openOnLoad" color="success" max-height="100px" variant="elevated" @click="shareAnswers(openOnClick)" block>
     <v-icon icon="mdi-share"></v-icon>share
   </v-btn>
   
@@ -62,7 +62,8 @@ export default {
     puzzleId: Number,
     openOnClick: Boolean,
     openOnLoad: Boolean,
-    message: String
+    message: String,
+    shareHeight: String
   },
   data() {
     return {
@@ -75,7 +76,7 @@ export default {
     if (this.openOnLoad) this.open = true;
   },
   computed: {
-    title() {
+    shareTitle() {
       return `Connections\nPuzzle #${this.puzzleId}\n`;
     }
   },
@@ -86,7 +87,7 @@ export default {
         try {
           var text = this.getEmojis();
           if (navigator.share) {
-            navigator.share({ title: undefined, text: (this.title + text) })
+            navigator.share({ title: undefined, text: (this.shareTitle + text) })
               .then(() => console.log('Successful share'))
               .catch(error => console.log('Error sharing:', error));
           } else {
@@ -101,7 +102,7 @@ export default {
     copyToClipboard() {
       var text = this.getEmojis();
       navigator.clipboard.write([new ClipboardItem({
-        'text/plain': new Blob([this.title + text], { type: 'text/plain' })
+        'text/plain': new Blob([this.shareTitle + text], { type: 'text/plain' })
       })])
         .then(() => {
           this.copySuccess = true;
