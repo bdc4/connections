@@ -22,17 +22,46 @@ const store = createStore({
   })],
   state() {
     return {
+      CACHE_LIMIT: 5,
       preferences: {
-        difficulty: 1,
-        showHints: false,
+        difficulty: 0,
+        showHints: true,
         customSettings: false,
-        unlimitedGuesses: false,
+        unlimitedGuesses: true,
         showAwayMessages: true
       },
-      game: {}
+      game: {},
+      cachedConnectionsData: []
     }
   },
   mutations: {
+    cacheDataResponse(state, response) {
+
+      // Update Cache if data exists at the cache key, otherwise add to cache.
+      /*
+      if (existingIndex !== -1) {
+        console.log(`exists at value ${existingIndex}`, state.cachedConnectionsData[existingIndex]);
+        state.cachedConnectionsData[existingIndex] = response;
+      } else {
+        state.cachedConnectionsData.push(response);
+      }
+      */
+
+      state.cachedConnectionsData.push(response);
+      // Prune the oldest item from the cache when the limit is exceeded
+      if (state.cachedConnectionsData.length > state.CACHE_LIMIT) {
+        var oldestIndex;
+        state.cachedConnectionsData.forEach((item, index, arr) => {
+          var ct = item[Object.keys(item)[0]]._cacheTime;
+          if (oldestIndex === undefined || ct < arr[oldestIndex]._cacheTime) {
+            oldestIndex = index;
+          }
+        });
+        if(oldestIndex >= 0) {
+          state.cachedConnectionsData.splice(oldestIndex, 1);
+        }
+      }
+    },
     save(state, payload) {
       state[payload.id] = payload.value;
     },

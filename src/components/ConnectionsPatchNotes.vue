@@ -53,7 +53,6 @@
 import patchNotes from '../notes/patchnotes.json'
 import { ref } from 'vue';
 
-console.log(patchNotes, 'patchNotes');
 const notes = patchNotes[0];
 const lastVersionChecked = localStorage.getItem('patchNotesVersion') || null;
 const alreadyReadNotes = ref(lastVersionChecked == notes.version);

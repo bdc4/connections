@@ -1,9 +1,6 @@
 <template>
-  <div>
+  <v-container>
     <!-- input v-on:keyup.enter="explode()" /-->
-    <template v-if="!Object.keys(this.connectionData).length">
-      <h1>Loading...</h1>
-    </template>
 
     <div>
       <ConfettiExplosion v-if="confetti.trigger" :particle-count="50" :colors="confetti.colors" class="img-r-180"
@@ -32,6 +29,13 @@
           </v-col>
         </v-row>
 
+        <!-- LOADER ROW -->
+        <v-row v-if="!Object.keys(this.connectionData).length" class="w-100 text-center">
+          <v-col>
+            <h1><v-progress-circular indeterminate></v-progress-circular> Loading...</h1>
+          </v-col>
+        </v-row>
+
         <!-- GRID ROW -->
         <v-row class="ml-2 mr-2">
           <v-col cols="12" v-for="answer in Object.keys(answered)" :key="answer" class="pa-0 mb-2" style="height: 15vh;"
@@ -43,42 +47,51 @@
               </div>
             </v-btn>
           </v-col>
-          <!--v-col v-for="(group, $index) in grid" :key="$index" class="align-center" style="height: 15vh;"-->
           <v-col cols="3" v-for="item in grid.flat()" :key="item" class="pa-1"
             style="width: 25vw; height: 15vh; max-height: 25vw;">
             <c-btn :size="buttonSize" :text="item" :showHint="hints.includes(item)" :color="getSelectionColor(item)"
               @click="select(item)" :c-data="getGroupInfoFromID(item)"></c-btn>
           </v-col>
-          <!--/v-row-->
         </v-row>
 
 
         <!-- TOOLBAR -->
         <v-row class="align-center justify-center mb-5" style="height: 10vh;">
-          <v-col :cols="window.width >= window.height ? '8' : '12'">
-            <v-btn v-if="!gameDone" :disabled="loading || selected.length !== 4" color="success" max-height="100px"
-              :variant="(loading || selected.length !== 4) ? 'outlined' : 'elevated'" @click="checkAnswers()" block>
-              <v-icon icon="mdi-check"></v-icon>Submit
-            </v-btn>
-            <c-share v-else :puzzle-id="connectionData.id" :tracker="tracker" :open-on-click="true"
-              share-height="80px"></c-share>
-          </v-col>
-          <v-col v-if="!gameDone">
-            <v-btn :disabled="loading" color="warning" @click="shuffle()" block>
-              <v-icon icon="mdi-shuffle"></v-icon>
-            </v-btn>
-          </v-col>
-          <v-col v-if="$store.state.preferences.showHints && !gameDone">
-            <v-btn :disabled="loading || hints.length > (grid.flat().length - 2)" color="info" @click="showHint()" block>
-              <v-icon icon="mdi-help-circle-outline"></v-icon>Show Hint
-            </v-btn>
-          </v-col>
-          <v-col v-if="!gameDone">
-            <v-btn :disabled="!selected.length" color="red" @click="selected = []"
-              :variant="(!selected.length) ? 'outlined' : 'elevated'" block>
-              <v-icon icon="mdi-close-thick"></v-icon>
-            </v-btn>
-          </v-col>
+          <template v-if="!gameDone">
+            <v-col :cols="'12'">
+              <v-btn v-if="!gameDone" :disabled="loading || selected.length !== 4" color="success" max-height="100px"
+                :variant="(loading || selected.length !== 4) ? 'outlined' : 'elevated'" @click="checkAnswers()" block>
+                <v-icon icon="mdi-check"></v-icon>Submit
+              </v-btn>
+            </v-col>
+            <v-col>
+              <v-btn :disabled="loading" color="warning" @click="shuffle()" block>
+                <v-icon icon="mdi-shuffle"></v-icon>
+              </v-btn>
+            </v-col>
+            <!--v-col v-if="Object.keys(answered).length == 3">
+              <c-field-goal></c-field-goal>
+            </v-col v-else-if="$store.state.preferences.showHints" -->
+            <v-col>
+              <v-btn v-if="selected.length > 1 || selected.length == 0"
+                :disabled="loading || hints.length > (grid.flat().length - 2)" color="info" @click="showHint()" block>
+                <v-icon icon="mdi-help-circle-outline"></v-icon>Show Hint
+              </v-btn>
+              <c-define v-else-if="selected.length == 1" :word="selected.length ? selected[0] : ''"></c-define>
+            </v-col>
+            <v-col>
+              <v-btn :disabled="!selected.length" color="red" @click="selected = []"
+                :variant="(!selected.length) ? 'outlined' : 'elevated'" block>
+                <v-icon icon="mdi-close-thick"></v-icon>
+              </v-btn>
+            </v-col>
+          </template>
+          <template v-else>
+            <v-col cols="12">
+              <c-share :puzzle-id="connectionData.id" :tracker="tracker" :open-on-click="true"
+                share-height="80px"></c-share>
+            </v-col>
+          </template>
         </v-row>
         <v-row v-if="!$store.state.preferences.unlimitedGuesses && !gameDone" class="text-center">
           <v-col v-for="(miss, ind) in [0, 1, 2, 3]" :key="ind">
@@ -99,7 +112,7 @@
         </v-card-text>
       </v-card>
     </v-dialog>
-  </div>
+  </v-container>
   <small>{{ appVersion }}</small>
 </template>
 
@@ -112,6 +125,8 @@ import ConnectionsShare from './ConnectionsShare.vue';
 import ConnectionsSettings from './ConnectionsSettings.vue';
 import ConnectionsTracker from './ConnectionsTracker.vue';
 import ConnectionsPatchNotes from './ConnectionsPatchNotes.vue';
+import ConnectionsDefine from './ConnectionsDefine.vue';
+import ConnectionsFieldGoal from './ConnectionsFieldGoal.vue';
 
 export default {
 
@@ -122,7 +137,9 @@ export default {
     cShare: ConnectionsShare,
     cPrefs: ConnectionsSettings,
     cTracker: ConnectionsTracker,
-    cPatchNotes: ConnectionsPatchNotes
+    cPatchNotes: ConnectionsPatchNotes,
+    cDefine: ConnectionsDefine,
+    cFieldGoal: ConnectionsFieldGoal
   },
   data() {
     return {
@@ -162,29 +179,27 @@ export default {
   },
   async mounted() {
 
-    var date = this.currentDate;
-    // TODO: Move this proxy to a dedicated webserver
-    var isDev = window.location.href.includes('localhost');
-    var url = isDev ? `/api/svc/connections/v1/${date}.json` : `https://root-lean-galleon.glitch.me/api?date=${this.currentDate}`
-    var data = (await axios({
-      method: "GET",
-      url,
-      crossDomain: true,
-      headers: {
-        "Content-Type": 'application/json'
-      }
-    })).data;
-
-    this.connectionData = data;
+    // Pull main data from browser cache or api
+    var data = await this.httpData();
+    this.connectionData = data.data || data;
     this.grid = this.connectionData.startingGroups;
 
     // Load Game State from memory
-    const gameState = this.$store.state.game[date];
+    const gameState = this.$store.state.game[this.currentDate] || {};
     this.gameStateKeys.forEach(key => {
       this[key] = gameState[key] || this[key];
     });
+
+    // load the next X days in the background (set from CACHE_LIMIT in state)
+    for (var i = 0; i < this.$store.state.CACHE_LIMIT; i++) {
+      // To do it in local time
+      var tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + i);
+      var ds = this.transformDate(tomorrow.toDateString());
+      this.httpData(ds).then(r => {});
+    }
   },
-  created() {
+  async created() {
     window.addEventListener('resize', this.handleResize);
     this.handleResize();
   },
@@ -224,7 +239,7 @@ export default {
     },
     currentDate() {
       var localDate = new Date().toDateString();
-      return this.$route.params.date || (new Date(localDate).toISOString().split('T')[0]);
+      return this.$route.params.date || (this.transformDate(localDate));
     },
     buttonSize() {
       var b = {
@@ -244,6 +259,63 @@ export default {
     }
   },
   methods: {
+    async httpData(dateString) {
+
+      dateString = dateString || this.currentDate;
+      var data;
+
+      console.log(`Attempting to retrieve from cache with key ${dateString}...`)
+
+      // Check cache, then try API
+      try {
+        var existingIndex = this.$store.state.cachedConnectionsData.findIndex(cacheItem => {
+          return (cacheItem[dateString])
+        });
+        if (existingIndex === -1) {
+          console.log(`Connection Data for ${dateString} not found in local storage. Pulling from API.`)
+          throw 'error';
+        }
+
+        data = this.$store.state.cachedConnectionsData[existingIndex][dateString];
+        data._fromCache = true;
+        console.log(`Cache Grab successful for key ${dateString}. Found at index ${existingIndex}.`);
+      } catch (e) {
+        try {
+          data = await this.callApi(dateString);
+          // write to cache
+          this.cacheConnectionsData(dateString, data);
+        } catch (f) {
+          console.error(`Unable to retrieve data and commit to cache. Key: ${dateString}`, data)
+        }
+      }
+      return data;
+    },
+    cacheConnectionsData(dateString, data) {
+      data = data && (data.data || data);
+      data._cacheTime = new Date(dateString).getTime();
+      this.$store.commit('cacheDataResponse', {
+        [dateString]: data
+      });
+    },
+    async callApi(dateString) {
+      var isDev = window.location.href.includes('localhost');
+
+      // TODO: Move this proxy to a dedicated webserver?
+      var url = (isDev) ? `/api/svc/connections/v1/${dateString}.json` : `https://root-lean-galleon.glitch.me/api?date=${dateString}`;
+      return axios({
+        method: "GET",
+        url,
+        data: { dateString },
+        crossDomain: true,
+        headers: {
+          "Content-Type": 'application/json'
+        }
+      });
+    },
+    transformDate(dateString) {
+      const d = new Date(dateString).toISOString().split('T')[0];
+      return d;
+    },
     getCategoryInfo() {
       const key = Object.keys(this.answered)[Object.keys(this.answered).length - 1];
       const refString = key && `answerRef${key}`; //.replace(' ','')
@@ -461,23 +533,42 @@ export default {
     showHint() {
       // get a random unanswered member
       var g = [...this.grid.flat()];
+
+      var lowestValidGroup;
+      var groups = [[], [], [], []];
+
+      g.filter(member => {
+        if (!this.hints.includes(member)) {
+          var data = this.getGroupInfoFromID(member);
+          groups[data.level].push(data);
+        }
+      });
+
+      groups.forEach(group => {
+        if (!lowestValidGroup && group.length) {
+          lowestValidGroup = group;
+        }
+      });
+
+      if (!lowestValidGroup) return;
+
+      this.hintUsed = true;
       var randomMember;
 
-      do {
-        randomMember = this.getRandomFromArray(g);
-      } while (this.hints.includes(randomMember));
+      randomMember = this.getRandomFromArray(lowestValidGroup);
+      if (lowestValidGroup.length <= 2) {
+        this.hints.push(randomMember.id);
+        return;
+      }
 
-      randomMember = this.getGroupInfoFromID(randomMember);
       var relatedMember = randomMember;
 
       // Make sure the related member isn't the same member
       while (relatedMember.id == randomMember.id) {
-        relatedMember = this.getRandomFromArray(randomMember.members);
-        relatedMember = this.getGroupInfoFromID(relatedMember);
+        relatedMember = this.getRandomFromArray(lowestValidGroup);
       }
 
       // add their keys to the hint array
-      this.hintUsed = true;
       this.hints.push(randomMember.id, relatedMember.id);
     },
     getRandomFromArray(g) {
