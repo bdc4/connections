@@ -1,5 +1,23 @@
 [{
   "title": "What's New?",
+  "subtitle": "Faster loading!",
+  "description": "I've added caching in the background so that future loads won't take as long. If you play pretty regularly, you shouldn't notice a long load time anymore. Let me know if you do.<br /><br />I've also added a Define feature!",
+  "updates": [
+    "Define: Select a single tile and press the 'Define' button to get a dictionary definition.",
+    "Added caching (I won't bore you with the techno mumbo jumbo; Enjoy your speedy load times!)"
+  ],
+  "fixes": [
+    "None. Let me know if you find any bugs."
+  ],
+  "comingSoon": [
+    "More helpful hint logic",
+    "The ability to go back and do previous Connections!"
+  ],
+  "version": "1.0.0.2",
+  "date": "2024-01-24"
+},
+{
+  "title": "What's New?",
   "subtitle": "Lots of updates!",
   "description": "Thanks for playing! Since there are lots of updates, I thought I'd start keeping track. Every time I make a significant change, I will release a document like this with a brief explination of the updates (aka: Patch Notes). Without further adieu, here are the changes!",
   "updates": [

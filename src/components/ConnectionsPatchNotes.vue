@@ -20,7 +20,7 @@
         </v-card-subtitle>
         <v-card-text>
           <v-alert shaped dark color="info" class="mt-2">
-            <p class="text-body-2">{{ notes.description }}</p>
+            <p class="text-body-2" v-html="notes.description"></p>
           </v-alert>
 
           <br />
