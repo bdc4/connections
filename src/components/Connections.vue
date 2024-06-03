@@ -43,7 +43,7 @@
             <v-btn :height="buttonSize.height" :color="getBorderColor(answer)" block @click="explode(answer)">
               <div>
                 <h3 style="white-space: normal;">{{ answer }}</h3>
-                <div>{{ answered[answer].join() }}</div>
+                <div style="white-space: break-spaces;">{{ answered[answer].join() }}</div>
               </div>
             </v-btn>
           </v-col>
@@ -88,7 +88,7 @@
           </template>
           <template v-else>
             <v-col cols="12">
-              <c-share :puzzle-id="connectionData.id" :tracker="tracker" :open-on-click="true"
+              <c-share :puzzle-id="currentDate" :tracker="tracker" :open-on-click="true"
                 share-height="80px"></c-share>
             </v-col>
           </template>
