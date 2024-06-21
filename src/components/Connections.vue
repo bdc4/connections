@@ -13,7 +13,7 @@
     </div>
 
     <v-container>
-      <v-row class="justify-space-between pa-3" style="height: 100vh;">
+      <v-row class="justify-space-between" style="height: 100vh;">
         <!-- HEADER ROW -->
         <v-row>
           <v-col cols="9">
@@ -37,13 +37,13 @@
         </v-row>
 
         <!-- GRID ROW -->
-        <v-row class="ml-2 mr-2">
+        <v-row class="">
           <v-col cols="12" v-for="answer in Object.keys(answered)" :key="answer" class="pa-0 mb-2" style="height: 15vh;"
             :ref="`answerRef${answer}`">
             <v-btn :height="buttonSize.height" :color="getBorderColor(answer)" block @click="explode(answer)">
               <div>
                 <h3 style="white-space: normal;">{{ answer }}</h3>
-                <div style="white-space: break-spaces;">{{ answered[answer].join() }}</div>
+                <div style="white-space: break-spaces;">{{ answered[answer].join(', ') }}</div>
               </div>
             </v-btn>
           </v-col>
