@@ -344,10 +344,17 @@ export default {
     getSelectionColor(item) {
       if (this.isSelected(item)) {
         var selectionIndex = this.selected.indexOf(item);
-        if (selectionIndex > 3) {
-          return 'red'
-        } else {
-          return 'primary'
+        if (selectionIndex <= 3) {
+          return '#2471a3'
+        }
+        else if (selectionIndex > 11) {
+          return '#ff5733'
+        }
+        else if (selectionIndex > 7) {
+          return 'brown'
+        } 
+        else if (selectionIndex > 3) {
+          return '#DAF7A6'
         }
       }
       return ''
