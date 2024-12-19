@@ -6,7 +6,7 @@
       <ConfettiExplosion v-if="confetti.trigger" :particle-count="50" :colors="confetti.colors" class="img-r-180"
         :stage-height="window.height" :stage-width="window.width * 1.25" :force="1"
         :style="`position: absolute; left: ${confetti.location.x}px; top: ${confetti.location.y}px;`" />
-      <v-snackbar v-model="showAlert" location="center" :color="snackbar.color" max-width="80" timeout="1500"
+      <v-snackbar v-model="showAlert" location="center" :color="snackbar.color" max-width="80" :timeout="snackbar.timeout || 1500"
         content-class="text-center">
         <span>{{ snackbar.message }}</span>
       </v-snackbar>
@@ -69,15 +69,8 @@
                 <v-icon icon="mdi-shuffle"></v-icon>
               </v-btn>
             </v-col>
-            <!--v-col v-if="Object.keys(answered).length == 3">
-              <c-field-goal></c-field-goal>
-            </v-col v-else-if="$store.state.preferences.showHints" -->
             <v-col>
-              <v-btn v-if="selected.length > 1 || selected.length == 0"
-                :disabled="loading || hints.length > (grid.flat().length - 2)" color="info" @click="showHint()" block>
-                <v-icon icon="mdi-help-circle-outline"></v-icon>Show Hint
-              </v-btn>
-              <c-define v-else-if="selected.length == 1" :word="selected.length ? selected[0] : ''"></c-define>
+              <c-hint-modal :selected="selected" @check-two="checkTwo" @get-two-random="showHint()"></c-hint-modal>
             </v-col>
             <v-col>
               <v-btn :disabled="!selected.length" color="red" @click="selected = []"
@@ -127,6 +120,7 @@ import ConnectionsTracker from './ConnectionsTracker.vue';
 import ConnectionsPatchNotes from './ConnectionsPatchNotes.vue';
 import ConnectionsDefine from './ConnectionsDefine.vue';
 import ConnectionsFieldGoal from './ConnectionsFieldGoal.vue';
+import ConnectionsHintsModal from './ConnectionsHintsModal.vue';
 
 export default {
 
@@ -139,7 +133,8 @@ export default {
     cTracker: ConnectionsTracker,
     cPatchNotes: ConnectionsPatchNotes,
     cDefine: ConnectionsDefine,
-    cFieldGoal: ConnectionsFieldGoal
+    cFieldGoal: ConnectionsFieldGoal,
+    cHintModal: ConnectionsHintsModal
   },
   data() {
     return {
@@ -535,6 +530,27 @@ export default {
         });
         if (data)
           return data;
+      }
+    },
+    checkTwo(data) {
+      var w1 = this.getGroupInfoFromID(data.wordOne);
+      var w2 = this.getGroupInfoFromID(data.wordTwo);
+      this.hintUsed = true;
+      if (w1.level === w2.level) {
+        this.hints.push(w1.id, w2.id);
+        this.snackbar.message = "It's a match! 🎉";
+        this.showAlert = true;
+        this.snackbar.timeout = 2000;
+        this.snackbar.color = 'green';
+      }
+      else {
+        var e = ["No Dice! 🎲", "Nuh uh 😏", "Nice try! But no... ⭐️", "Better luck next time! 🍀", "Really?? You thought those went together?!? 🙄",
+        "Try Harder 💪","Nope! 😂","Negative Rampart ✈️"];
+        e = this.getRandomFromArray(e);
+        this.snackbar.message = e;
+        this.showAlert = true;
+        this.snackbar.timeout = 2000;
+        this.snackbar.color = 'red';
       }
     },
     showHint() {

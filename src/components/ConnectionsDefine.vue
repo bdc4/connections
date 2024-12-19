@@ -3,12 +3,12 @@
     <!-- Activator Button -->
     <v-tooltip v-model="noDefinition" :open-on-hover="false" location="top">
       <template v-slot:activator="{ props }">
-        <v-btn v-bind="props" @click="defineWord(word)" :disabled="!word" width="140" block>
+        <v-btn v-bind="props" @click="defineWord(word)" :disabled="!word" color="info" variant=outlined block>
           <span>
             <v-icon v-if="!loading">mdi-book</v-icon>
             <v-progress-circular v-else indeterminate :size="18"></v-progress-circular>
           </span>
-          {{ word || 'define' }}
+          {{ word }}
         </v-btn>
       </template>
       <span>No Definition Found</span>

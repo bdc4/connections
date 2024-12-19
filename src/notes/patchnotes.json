@@ -1,6 +1,23 @@
 [
   {
     "title": "What's New?",
+    "subtitle": "New Hint Functionality!",
+    "description": "TL;DR: New Hint Menu!",
+    "updates": [
+      "Now pressing the hint button opens a menu with several hint options. Try it out!"
+        ],
+    "fixes": [
+      "No bug found to fix... Let me know if you find any."
+    ],
+    "comingSoon": [
+      "The ability to go back and do previous Connections!",
+      "Fixes to the caching."
+    ],
+    "version": "1.0.0.4",
+    "date": "2024-12-19"
+  },
+  {
+    "title": "What's New?",
     "subtitle": "Bug Fixes and Messaging!",
     "description": "TL;DR: Some UI fixes and added the ability to add a message after the emojis to make things easier.",
     "updates": [
