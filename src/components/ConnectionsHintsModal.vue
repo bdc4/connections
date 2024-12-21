@@ -62,11 +62,11 @@ const wordTwo = computed(() => props.selected[props.selected.length - 2]);
 var openModal = ref(false);
 var getTwoRandom = function() {
   emit('get-two-random', {});
-  this.openModal = false;
+  openModal.value = false;
 }
 var checkTwo = function() {
   emit('check-two', { wordOne: wordOne.value, wordTwo: wordTwo.value });
-  this.openModal = false;
+  openModal.value = false;
 }
 
 </script>
