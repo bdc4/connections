@@ -1,11 +1,28 @@
 [
   {
     "title": "What's New?",
+    "subtitle": "Lightning Fast Loading (Finally) and Updated Sorting/Shuffling!",
+    "description": "Lightning fast loading and future-proofing! New shuffle button functionality!",
+    "updates": [
+      "I've updated the way the app loads the data. It should be much faster now, and it will be easier to add new features in the future. It will also have fewer dependencies on other external resources.",
+      "The shuffle button now shuffles the grid, but it also shuffles the selected items to the end of the grid. This means that if you have a group selected, it will be at the end of the grid when you shuffle. This is a change from previous versions, so let me know if you like it or not."
+    ],
+    "fixes": [
+      "None. Let me know if you find any bugs."
+    ],
+    "comingSoon": [
+      "The ability to go back and do previous Connections!"
+    ],
+    "version": "1.0.0.5",
+    "date": "2025-07-13"
+  },
+  {
+    "title": "What's New?",
     "subtitle": "New Hint Functionality!",
     "description": "TL;DR: New Hint Menu!",
     "updates": [
       "Now pressing the hint button opens a menu with several hint options. Try it out!"
-        ],
+    ],
     "fixes": [
       "No bug found to fix... Let me know if you find any."
     ],

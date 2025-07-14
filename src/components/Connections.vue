@@ -6,8 +6,8 @@
       <ConfettiExplosion v-if="confetti.trigger" :particle-count="50" :colors="confetti.colors" class="img-r-180"
         :stage-height="window.height" :stage-width="window.width * 1.25" :force="1"
         :style="`position: absolute; left: ${confetti.location.x}px; top: ${confetti.location.y}px;`" />
-      <v-snackbar v-model="showAlert" location="center" :color="snackbar.color" max-width="80" :timeout="snackbar.timeout || 1500"
-        content-class="text-center">
+      <v-snackbar v-model="showAlert" location="center" :color="snackbar.color" max-width="80"
+        :timeout="snackbar.timeout || 1500" content-class="text-center">
         <span>{{ snackbar.message }}</span>
       </v-snackbar>
     </div>
@@ -81,8 +81,7 @@
           </template>
           <template v-else>
             <v-col cols="12">
-              <c-share :puzzle-id="currentDate" :tracker="tracker" :open-on-click="true"
-                share-height="80px"></c-share>
+              <c-share :puzzle-id="currentDate" :tracker="tracker" :open-on-click="true" share-height="80px"></c-share>
             </v-col>
           </template>
         </v-row>
@@ -99,7 +98,8 @@
     <v-dialog v-model="gameOver" persistent>
       <v-card>
         <v-card-text>
-          <c-share :open-on-load="true" :puzzle-id="connectionData.id" :tracker="tracker" message="Nice Try..."></c-share>
+          <c-share :open-on-load="true" :puzzle-id="connectionData.id" :tracker="tracker"
+            message="Nice Try..."></c-share>
           <v-btn @click="removeMisses(); gameOver = false;" class="mt-10" variant="flat" color="red"
             block>Continue?</v-btn>
         </v-card-text>
@@ -175,8 +175,10 @@ export default {
   async mounted() {
 
     // Pull main data from browser cache or api
-    var data = await this.httpData();
-    this.connectionData = data.data || data;
+    await this.httpData();
+    this.connectionData = this.$store.state.cachedConnectionsData.find(cacheItem => {
+      return cacheItem[this.currentDate];
+    })[this.currentDate];
     this.grid = this.connectionData.startingGroups;
 
     // Load Game State from memory
@@ -185,14 +187,6 @@ export default {
       this[key] = gameState[key] || this[key];
     });
 
-    // load the next X days in the background (set from CACHE_LIMIT in state)
-    for (var i = 0; i < this.$store.state.CACHE_LIMIT; i++) {
-      // To do it in local time
-      var tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + i);
-      var ds = this.transformDate(tomorrow.toDateString());
-      this.httpData(ds).then(r => {});
-    }
   },
   async created() {
     window.addEventListener('resize', this.handleResize);
@@ -267,7 +261,7 @@ export default {
           return (cacheItem[dateString])
         });
         if (existingIndex === -1) {
-          console.log(`Connection Data for ${dateString} not found in local storage. Pulling from API.`)
+          console.log(`Connection Data for ${dateString} not found in local storage. Pulling from server.`)
           throw 'error';
         }
 
@@ -276,11 +270,25 @@ export default {
         console.log(`Cache Grab successful for key ${dateString}. Found at index ${existingIndex}.`);
       } catch (e) {
         try {
-          data = await this.callApi(dateString);
-          // write to cache
-          this.cacheConnectionsData(dateString, data);
+
+          await fetch(`../../json/${dateString}.json`).then(response =>
+            response.json().then(data => ({
+              data: data,
+              status: response.status
+            })
+            ).then(res => {
+              console.log(res.status, res.data);
+              this.cacheConnectionsData(dateString, res.data);
+            }))
+            .catch(err => {
+              console.error(`Error retrieving data from local JSON file: ${err}`);
+              throw err;
+            });
+
+
         } catch (f) {
-          console.error(`Unable to retrieve data and commit to cache. Key: ${dateString}`, data)
+          console.error(`Unable to retrieve data and commit to cache. Key: ${dateString}`, data);
+          console.error(f);
         }
       }
       return data;
@@ -292,6 +300,7 @@ export default {
         [dateString]: data
       });
     },
+
     async callApi(dateString) {
       var isDev = window.location.href.includes('localhost');
 
@@ -347,7 +356,7 @@ export default {
         }
         else if (selectionIndex > 7) {
           return 'brown'
-        } 
+        }
         else if (selectionIndex > 3) {
           return '#DAF7A6'
         }
@@ -466,9 +475,13 @@ export default {
       }
 
       // Generate random grid
+
       try {
-        var outputGrid = [...this.flattenedGrid];
+        var outputGrid = [...this.flattenedGrid.filter(item => !this.selected.includes(item))];
         outputGrid.sort(() => Math.random() - 0.5);
+        var _selectedItems = this.selected.slice();
+        console.log(this.selected, _selectedItems);
+        outputGrid = outputGrid.concat(_selectedItems.reverse());
         this.reconstructGrid(outputGrid, true);
         this.loading = false;
       } catch (e) {
@@ -545,7 +558,7 @@ export default {
       }
       else {
         var e = ["No Dice! 🎲", "Nuh uh 😏", "Nice try! But no... ⭐️", "Better luck next time! 🍀", "Really?? You thought those went together?!? 🙄",
-        "Try Harder 💪","Nope! 😂","Negative Rampart ✈️"];
+          "Try Harder 💪", "Nope! 😂", "Negative Rampart ✈️"];
         e = this.getRandomFromArray(e);
         this.snackbar.message = e;
         this.showAlert = true;
