@@ -271,20 +271,36 @@ export default {
       } catch (e) {
         try {
 
-          await fetch(`../../json/${dateString}.json`).then(response =>
-            response.json().then(data => ({
-              data: data,
-              status: response.status
+/*
+          this.callApi(dateString)
+            .then(response => {
+              if (response.status === 200) {
+                data = response.data;
+                this.cacheConnectionsData(dateString, data);
+              } else {
+                console.error(`Error retrieving data from API: ${response.status}`);
+                throw new Error(`API Error: ${response.status}`);
+              }
             })
-            ).then(res => {
-              console.log(res.status, res.data);
-              this.cacheConnectionsData(dateString, res.data);
-            }))
             .catch(err => {
-              console.error(`Error retrieving data from local JSON file: ${err}`);
+              console.error(`Error retrieving data from API: ${err}`);
               throw err;
-            });
+            })
+          */
 
+        await fetch(import.meta.env.BASE_URL + `/json/${dateString}.json`).then(response =>
+          response.json().then(data => ({
+            data: data,
+            status: response.status
+          })
+          ).then(res => {
+            console.log(res.status, res.data);
+            this.cacheConnectionsData(dateString, res.data);
+          }))
+          .catch(err => {
+            console.error(`Error retrieving data from local JSON file: ${err}`);
+            throw err;
+          });
 
         } catch (f) {
           console.error(`Unable to retrieve data and commit to cache. Key: ${dateString}`, data);
@@ -305,7 +321,7 @@ export default {
       var isDev = window.location.href.includes('localhost');
 
       // TODO: Move this proxy to a dedicated webserver?
-      var url = (isDev) ? `/api/svc/connections/v1/${dateString}.json` : `https://root-lean-galleon.glitch.me/api?date=${dateString}`;
+      var url = import.meta.env.BASE_URL + `/json/${dateString}.json`; //(isDev) ? `/api/svc/connections/v1/${dateString}.json` : `https://raw.githubusercontent.com/bdc4/connections/refs/heads/main/json/${dateString}.json`;
       return axios({
         method: "GET",
         url,
