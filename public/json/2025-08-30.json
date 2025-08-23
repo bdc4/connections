@@ -1,0 +1,67 @@
+{
+  "id": 849,
+  "groups": {
+    "NOT BE GOOD": {
+      "level": 0,
+      "members": [
+        "BITE",
+        "BLOW",
+        "STINK",
+        "SUCK"
+      ]
+    },
+    "MUSIC GENRES": {
+      "level": 1,
+      "members": [
+        "EMO",
+        "FUNK",
+        "METAL",
+        "POP"
+      ]
+    },
+    "DO EXCEPTIONALLY WELL": {
+      "level": 2,
+      "members": [
+        "EAT",
+        "ROCK",
+        "RULE",
+        "SLAY"
+      ]
+    },
+    "CONTEMPORARY COMPOSERS": {
+      "level": 3,
+      "members": [
+        "CAGE",
+        "ENO",
+        "GLASS",
+        "REICH"
+      ]
+    }
+  },
+  "startingGroups": [
+    [
+      "BLOW",
+      "GLASS",
+      "FUNK",
+      "STINK"
+    ],
+    [
+      "METAL",
+      "ROCK",
+      "BITE",
+      "EAT"
+    ],
+    [
+      "CAGE",
+      "EMO",
+      "ENO",
+      "RULE"
+    ],
+    [
+      "SLAY",
+      "SUCK",
+      "POP",
+      "REICH"
+    ]
+  ]
+}
